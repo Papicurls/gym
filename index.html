@@ -235,7 +235,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: -8px; }
 .save-note { font-size: 12px; color: var(--fg-muted); text-align: right; }
 .save-note.bad { color: var(--error-fg); }
-.w-title { display: flex; align-items: center; gap: 10px; }
+.w-title { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.w-cancel { margin-left: auto; }
 .w-hint { margin: -10px 0 0; font-size: 13px; color: var(--fg-muted); }
 .ex-list { display: flex; flex-direction: column; gap: 10px; }
 .ex {
@@ -375,6 +376,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .install { margin: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(240, 180, 41, 0.36); background: rgba(240, 180, 41, 0.10); font-size: 13px; line-height: 1.45; }
 .install b { color: var(--accent-2); font-weight: 600; }
 .idea-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.file-pick { position: fixed; left: -200px; top: 0; width: 1px; height: 1px; opacity: 0; }
 .topbar-r { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .idea-btn { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 38px; padding: 0 12px 0 10px; border: 1px solid rgba(240, 180, 41, 0.4); border-radius: 999px; color: var(--accent-2); font-size: 13px; font-weight: 600; transition: background var(--motion-fast); }
 .idea-btn:hover { background: rgba(240, 180, 41, 0.1); }
@@ -409,7 +411,7 @@ textarea.field { min-height: 128px; resize: vertical; line-height: 1.45; font-si
   <p>Your workouts are saved on this phone.</p>
   <p class="warn" id="storeNote" hidden></p>
 </footer>
-<input type="file" id="restore-file" accept="application/json,.json" hidden>
+<input type="file" id="restore-file" class="file-pick" accept="application/json,.json" tabindex="-1" aria-hidden="true">
 
 <script>
 (() => {
@@ -1472,6 +1474,7 @@ function renderHome() {
 
   return `<header class="home-head"><div><h1 class="title">Gym</h1><p class="tagline">Upper · lower · rest</p></div>${ideaBtn()}</header>
     ${installHtml()}
+    ${freshPhone() ? backupHtml() : ''}
     ${saveWarnHtml()}
     <div class="tiles">${tiles}</div>
     ${hint ? `<p class="hint">${hint}</p>` : ''}
@@ -1480,7 +1483,7 @@ function renderHome() {
     <div class="stack">${charts}<p class="note">100 = your first logged workout. Each point is a workout: every lift's heaviest weight is compared with the last time you did it, and the line moves by the average change.</p></div>
     <section class="stack"><h2 class="h-sec">Exercise progression</h2><p class="note">Each point is the heaviest weight you used on that lift that day. Tap a lift for its full history.</p>${progHtml}</section>
     <section class="stack-sm"><div><button class="txt" data-act="toggle-past" aria-expanded="${ui.pastOpen}">${ui.pastOpen ? 'Hide past workouts' : `Past workouts (${past.length})`}</button></div>${pastList}</section>
-    ${backupHtml()}`;
+    ${freshPhone() ? '' : backupHtml()}`;
 }
 
 /* ---------- Home-screen app: install note, backup, restore ---------- */
@@ -1495,8 +1498,10 @@ function backupDue() {
   const a = backupAge();
   return Object.keys(S.sessions).length > 0 && (a == null || a >= BACKUP_DUE_DAYS);
 }
+const freshPhone = () => !Object.keys(S.sessions).length;
 function backupHtml() {
   if (!LOCAL) return '';
+  const fresh = freshPhone();
   const a = backupAge();
   const when = a == null ? 'No backup yet.' : `Last backup: ${a === 0 ? 'today' : a === 1 ? 'yesterday' : a + ' days ago'}.`;
   const r = ui.restore;
@@ -1504,7 +1509,12 @@ function backupHtml() {
   const actions = r
     ? `<p class="note">This backup has ${plural(r.count, 'workout')}${r.last ? `, the newest from ${esc(fmtDate(r.last))}` : ''}. It replaces everything on this phone.</p>
       <div class="backup-row"><button class="btn-primary" data-act="restore-yes">Replace with this backup</button><button class="txt muted" data-act="restore-no">Cancel</button></div>`
+    : fresh ? '<button class="btn-primary" data-act="restore">Restore from a backup</button>'
     : '<div class="backup-row"><button class="btn-ghost" data-act="backup">Back up now</button><button class="txt muted" data-act="restore">Restore from a backup</button></div>';
+  if (fresh) {
+    return `<section class="card stack-sm"><h2 class="h-sec">Bring over your workouts</h2>
+      <p class="note">Your past workouts are in a backup file in iCloud Drive, named like gym-backup-2026-10-24.json. Tap Restore and pick it.</p>${msg}${actions}</section>`;
+  }
   return `<section class="card stack-sm"><h2 class="h-sec">Backup</h2>
     <p class="note">Your workouts are saved on this phone only. Back up to iCloud Drive (Save to Files) so a new phone or a deleted app doesn't lose them.</p>
     <p class="backup-when${backupDue() ? ' due' : ''}">${when}</p>${msg}${actions}</section>`;
@@ -1569,6 +1579,7 @@ function applyRestore() {
   autoFinishStale();
   ui.restore = null;
   ui.backupMsg = { text: `Restored ${plural(r.count, 'workout')}.` };
+  ui.toast = ui.backupMsg.text;
   settleLocal();
   render();
 }
@@ -1716,7 +1727,7 @@ function renderWorkout() {
   const cs = completeState(w);
   return `<div class="topbar"><button class="back" data-act="back">${ICON_BACK}Gym</button><span class="topbar-r"><span class="save-note" id="saveNote" role="status"></span>${ideaBtn()}</span></div>
     ${saveWarnHtml()}
-    <div class="w-title"><h1 class="h-day">${DAY_NAME[day]}</h1>${livePill()}</div>
+    <div class="w-title"><h1 class="h-day">${DAY_NAME[day]}</h1>${livePill()}${cancelBtn(w)}</div>
     <p class="w-hint">Tap a number to type it. Drag ${ICON_GRIP} to move a lift.</p>
     <div class="ex-list">${w.exercises.map(renderExCard).join('')}</div>
     <button class="btn-ghost" data-act="add-exercise">+ Add exercise</button>
@@ -2048,6 +2059,24 @@ function completeWorkout() {
   setRoute({ screen: 'home' });
   flushNow();
 }
+// Tapping Upper or Lower starts a workout, so one opened by mistake can be dropped without saving anything.
+function cancelBtn(w) {
+  const n = w.exercises.filter(willSave).length;
+  const on = isConfirm('cancel');
+  const label = on ? (n ? `Tap again to throw away ${plural(n, 'lift')}` : 'Tap again to cancel') : 'Cancel workout';
+  return `<button class="txt ${on ? 'danger' : 'muted'} w-cancel" data-act="cancel-workout">${label}</button>`;
+}
+function cancelWorkout() {
+  if (!isConfirm('cancel')) { armConfirm('cancel'); return; }
+  clearConfirm();
+  const day = ui.day;
+  if (!S.live[day]) return;
+  S.live[day] = null;
+  touchLive(null);
+  ui.toast = `${DAY_NAME[day]} workout canceled. Nothing was saved.`;
+  ui.stack = [];
+  setRoute({ screen: 'home' });
+}
 function openDay(day) {
   ui.toast = null;
   if (!S.live[day]) {
@@ -2233,7 +2262,7 @@ function onClick(ev) {
 
   // Every other action closes the editor first.
   const hadEditor = closeEditor();
-  if (a !== 'complete' && a !== 'remove-ex' && a !== 'idea-del') clearConfirm();
+  if (a !== 'complete' && a !== 'remove-ex' && a !== 'idea-del' && a !== 'cancel-workout') clearConfirm();
 
   switch (a) {
     case 'open-day': openDay(t.dataset.day); break;
@@ -2301,6 +2330,7 @@ function onClick(ev) {
     case 'pick-track': pickTrack(i, t.dataset.track); break;
     case 'add-exercise': go({ screen: 'add', day: ui.day }); break;
     case 'complete': if (ui.confirm && ui.confirm.key !== 'complete') clearConfirm(); completeWorkout(); break;
+    case 'cancel-workout': if (ui.confirm && ui.confirm.key !== 'cancel') clearConfirm(); cancelWorkout(); break;
     case 'add-cat': addToWorkout(t.dataset.name); break;
     case 'new-ex-open': {
       ui.addOpen = true;
