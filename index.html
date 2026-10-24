@@ -377,6 +377,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .install b { color: var(--accent-2); font-weight: 600; }
 .idea-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .file-pick { position: fixed; left: -200px; top: 0; width: 1px; height: 1px; opacity: 0; }
+label.btn-primary, label.txt { cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .topbar-r { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .idea-btn { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 38px; padding: 0 12px 0 10px; border: 1px solid rgba(240, 180, 41, 0.4); border-radius: 999px; color: var(--accent-2); font-size: 13px; font-weight: 600; transition: background var(--motion-fast); }
 .idea-btn:hover { background: rgba(240, 180, 41, 0.1); }
@@ -411,7 +412,7 @@ textarea.field { min-height: 128px; resize: vertical; line-height: 1.45; font-si
   <p>Your workouts are saved on this phone.</p>
   <p class="warn" id="storeNote" hidden></p>
 </footer>
-<input type="file" id="restore-file" class="file-pick" accept="application/json,.json" tabindex="-1" aria-hidden="true">
+<input type="file" id="restore-file" class="file-pick" tabindex="-1" aria-hidden="true">
 
 <script>
 (() => {
@@ -1509,8 +1510,8 @@ function backupHtml() {
   const actions = r
     ? `<p class="note">This backup has ${plural(r.count, 'workout')}${r.last ? `, the newest from ${esc(fmtDate(r.last))}` : ''}. It replaces everything on this phone.</p>
       <div class="backup-row"><button class="btn-primary" data-act="restore-yes">Replace with this backup</button><button class="txt muted" data-act="restore-no">Cancel</button></div>`
-    : fresh ? '<button class="btn-primary" data-act="restore">Restore from a backup</button>'
-    : '<div class="backup-row"><button class="btn-ghost" data-act="backup">Back up now</button><button class="txt muted" data-act="restore">Restore from a backup</button></div>';
+    : fresh ? '<label class="btn-primary" for="restore-file">Restore from a backup</label>'
+    : '<div class="backup-row"><button class="btn-ghost" data-act="backup">Back up now</button><label class="txt muted" for="restore-file">Restore from a backup</label></div>';
   if (fresh) {
     return `<section class="card stack-sm"><h2 class="h-sec">Bring over your workouts</h2>
       <p class="note">Your past workouts are in a backup file in iCloud Drive, named like gym-backup-2026-10-24.json. Tap Restore and pick it.</p>${msg}${actions}</section>`;
@@ -1549,14 +1550,19 @@ async function runBackup() {
   render();
 }
 
+// Every step shows a message, so a restore that stops partway says where.
 async function onRestoreFile(ev) {
-  const f = ev.target.files && ev.target.files[0];
+  const input = ev.target;
+  const f = input.files && input.files[0];
   if (!f) return;
+  ui.restore = null;
+  ui.backupMsg = { text: `Reading ${f.name}…` };
+  render();
   let d = null;
   try { d = JSON.parse(await f.text()); } catch (e) { d = null; }
+  input.value = ''; // picking the same file again still counts as a change
   if (!d || typeof d !== 'object' || !d.config || !d.sessions || typeof d.sessions !== 'object') {
-    ui.restore = null;
-    ui.backupMsg = { text: "That file isn't a Gym backup.", bad: true };
+    ui.backupMsg = { text: `${f.name} isn't a Gym backup. Pick the file named like gym-backup-2026-10-24.json.`, bad: true };
   } else {
     const list = Object.values(d.sessions).filter(Boolean);
     ui.restore = { data: d, count: list.length, last: list.map((s) => s.date).filter(Boolean).sort().pop() || null };
@@ -1579,9 +1585,11 @@ function applyRestore() {
   autoFinishStale();
   ui.restore = null;
   ui.backupMsg = { text: `Restored ${plural(r.count, 'workout')}.` };
-  ui.toast = ui.backupMsg.text;
+  ui.toast = `Restored ${plural(r.count, 'workout')}. They're listed under Past workouts.`;
+  ui.pastOpen = true;
   settleLocal();
   render();
+  window.scrollTo(0, 0);
 }
 
 function idxDetail(pts, i) {
@@ -2302,12 +2310,6 @@ function onClick(ev) {
     case 'idea-save': saveIdea(); break;
     case 'copy-ideas': copyIdeas(); break;
     case 'backup': runBackup(); break;
-    case 'restore': {
-      ui.backupMsg = null;
-      const el = document.getElementById('restore-file');
-      if (el) { el.value = ''; el.click(); }
-      break;
-    }
     case 'restore-yes': applyRestore(); break;
     case 'restore-no': ui.restore = null; render(); break;
     case 'idea-del': if (ui.confirm && ui.confirm.key !== 'idea-' + t.dataset.id) clearConfirm(); deleteIdea(t.dataset.id); break;

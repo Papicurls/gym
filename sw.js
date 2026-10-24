@@ -1,6 +1,6 @@
 // Network first, so a new version shows up the next time the app opens online.
 // With no signal (or a slow one) the last saved copy opens instead.
-const CACHE = 'gym-v1';
+const CACHE = 'gym-v2';
 const WAIT_MS = 3000;
 
 self.addEventListener('install', (ev) => {
@@ -15,7 +15,9 @@ self.addEventListener('fetch', (ev) => {
   if (req.method !== 'GET' || !req.url.startsWith('http')) return;
   ev.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const net = fetch(req).then((res) => {
+    // The app's own files skip the browser cache (GitHub Pages lets it hold them 10 minutes), so an update shows at once.
+    const own = new URL(req.url).origin === self.location.origin;
+    const net = (own ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req)).then((res) => {
       if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
       return res;
     });
