@@ -169,6 +169,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* Home */
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile.is-open { border-color: var(--accent-strong); }
+.leg-pick { display: grid; gap: 10px; }
+.leg-opt { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; text-align: left; transition: border-color var(--motion-fast); }
+.leg-opt:hover { border-color: rgba(167, 139, 250, 0.45); }
+.leg-opt.is-live { border-color: var(--success-border); }
+.leg-head { display: flex; align-items: center; gap: 8px; }
+.leg-lifts { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+.leg-lifts .pb-name, .leg-lifts .pb-sets { display: block; }
 .tile {
   display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
   min-height: 98px; padding: 16px 14px; text-align: left;
@@ -244,7 +252,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   transition: border-color var(--motion-fast);
 }
-.ex input { -webkit-user-select: text; user-select: text; }
+.ex input, .ex textarea { -webkit-user-select: text; user-select: text; }
 .ex.is-logged { border-color: var(--success-border); }
 .ex.shifting { transition: transform 0.18s ease, border-color var(--motion-fast); }
 .ex.dragging {
@@ -267,6 +275,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .icon-btn:hover { color: var(--fg); }
 .icon-btn.on { color: var(--accent-strong); background: rgba(139, 92, 246, 0.14); }
 .badge-btn { min-height: 38px; padding: 6px 4px 6px 8px; display: flex; align-items: center; }
+.done-mark { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 11px 0 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--fg-muted); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast); }
+.done-mark i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; }
+.badge-btn:hover .done-mark { color: var(--fg); }
+.done-mark.is-done { background: var(--success-fg); border-color: var(--success-fg); color: #06301a; }
+.ex-note { display: flex; align-items: flex-start; gap: 8px; width: 100%; margin: -4px 0 -2px; padding: 8px 10px; border-radius: 8px; background: rgba(240, 180, 41, 0.08); border: 1px solid rgba(240, 180, 41, 0.28); color: var(--fg); font-size: 14px; line-height: 1.4; text-align: left; }
+.ex-note svg { flex: none; margin-top: 1px; color: var(--accent-2); }
+.ex-note span { white-space: pre-wrap; overflow-wrap: anywhere; }
+.note-edit { display: flex; flex-direction: column; gap: 8px; }
+.note-edit textarea.field { min-height: 72px; }
+.note-btns { display: flex; align-items: center; gap: 12px; }
+.note-btns .btn-primary { width: auto; min-height: 42px; padding: 0 18px; }
 .ex-chart { display: flex; flex-direction: column; gap: 4px; padding: 10px; border-radius: 8px; background: rgba(0, 0, 0, 0.18); border: 1px solid var(--border); }
 .ex-chart .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .ch-line { font-size: 12px; color: var(--fg-muted); }
@@ -283,6 +302,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .rir:hover { color: var(--fg); }
 .rir.on { border-style: solid; border-color: var(--accent); background: rgba(139, 92, 246, 0.22); color: var(--fg); }
 .side-line { display: flex; align-items: center; justify-content: space-between; gap: 4px 8px; flex-wrap: wrap; margin: -6px 0 -4px; font-size: 13px; color: var(--fg-muted); }
+.range-slot { display: contents; }
+.range-line { display: flex; align-items: flex-start; gap: 6px; margin: -6px 0 -4px; font-size: 13px; line-height: 1.4; color: var(--accent-2); }
+.range-line svg { flex: none; margin-top: 2px; }
+.step.nudge { border-color: rgba(240, 180, 41, 0.75); background: rgba(240, 180, 41, 0.12); color: var(--accent-2); }
 .save-warn { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border-radius: 8px; background: var(--error-bg); color: var(--error-fg); border: 1px solid var(--error-border); font-size: 13px; line-height: 1.4; }
 .save-warn .txt { color: var(--error-fg); flex: none; }
 .cl { display: flex; align-items: center; gap: 3px; min-width: 0; }
@@ -329,6 +352,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .pill.on { background: rgba(139, 92, 246, 0.24); border-color: var(--accent); color: var(--fg); }
 .ex-foot { display: flex; align-items: center; gap: 6px; margin: -4px -4px -6px; }
 .ex-foot .foot-r { display: flex; gap: 6px; margin-left: auto; }
+.skip-note { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; border: 1px dashed var(--border); border-radius: 14px; font-size: 14px; color: var(--fg-muted); }
+.skip-note b { color: var(--fg); font-weight: 600; }
+.skip-note .txt { margin-left: auto; flex: none; }
+
+/* Rest timer: fixed to the screen, outside the panel */
+body.has-rest { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.rest { position: fixed; z-index: 20; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(448px, calc(100% - 32px)); display: flex; justify-content: flex-end; pointer-events: none; }
+.rest > * { pointer-events: auto; }
+.rest-start { display: inline-flex; align-items: center; gap: 7px; min-height: 46px; padding: 0 18px 0 15px; border-radius: 999px; background: var(--surface); border: 1px solid rgba(139, 92, 246, 0.55); color: var(--accent-strong); font-weight: 600; font-size: 15px; box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.85); }
+.rest-start:active { transform: scale(0.97); }
+.rest-bar { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 64px; padding: 10px 10px 12px 16px; border-radius: 14px; background: #241f33; border: 1px solid rgba(139, 92, 246, 0.6); box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.9); }
+.rest-bar.is-done { background: #14301f; border-color: var(--success-fg); animation: rest-pulse 1.2s ease-in-out 3; }
+@keyframes rest-pulse { 50% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0.25), 0 18px 40px -12px rgba(0, 0, 0, 0.9); } }
+.rest-main { display: flex; flex-direction: column; min-width: 0; }
+.rest-k { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-muted); }
+.rest-bar.is-done .rest-k { color: var(--success-fg); }
+.rest-time { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 26px; line-height: 1.1; }
+.rest-bar.is-done .rest-time { font-family: var(--font-body); font-size: 18px; font-weight: 600; }
+.rest-btns { display: flex; gap: 6px; flex: none; }
+.rest-b { min-width: 48px; min-height: 42px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255, 255, 255, 0.05); font-family: var(--font-mono); font-size: 14px; }
+.rest-b.stop { font-family: var(--font-body); font-weight: 600; color: var(--error-fg); border-color: var(--error-border); }
+.rest-bar.is-done .rest-b { font-family: var(--font-body); font-weight: 600; min-width: 64px; border-color: var(--success-fg); color: var(--success-fg); }
+.rest-prog { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, rgb(69, 214, 208), rgb(190, 232, 100)); transform-origin: left; transition: transform 0.25s linear; }
 
 /* Exercise screen */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -387,7 +433,7 @@ textarea.field { min-height: 128px; resize: vertical; line-height: 1.45; font-si
 .idea-meta { display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap; font-size: 12px; color: var(--fg-muted); }
 .idea-meta .txt { margin-left: auto; min-height: 32px; font-size: 13px; }
 
-.step:active, .btn-primary:active, .tile:active, .pill:active, .add-row:active, .prog:active { transform: scale(0.97); }
+.step:active, .btn-primary:active, .tile:active, .pill:active, .add-row:active, .prog:active, .leg-opt:active { transform: scale(0.97); }
 
 @media (max-width: 400px) {
   .step { width: 34px; }
@@ -400,14 +446,18 @@ textarea.field { min-height: 128px; resize: vertical; line-height: 1.45; font-si
 @media (prefers-reduced-motion: reduce) {
   .live i { animation: none; }
   .screen.enter { animation: none; }
-  .step:active, .btn-primary:active, .tile:active, .pill:active, .add-row:active, .prog:active { transform: none; }
+  .step:active, .btn-primary:active, .tile:active, .pill:active, .add-row:active, .prog:active, .leg-opt:active { transform: none; }
   .btn-primary:hover { transform: none; }
   .ex.shifting { transition: none; }
+  .rest-bar.is-done { animation: none; }
+  .rest-prog { transition: none; }
 }
 </style>
 </head>
 <body>
 <main class="panel" id="app" aria-live="polite"></main>
+<!-- Outside the panel: its backdrop blur would pin a fixed bar to the panel instead of the screen. -->
+<div class="rest" id="rest" hidden></div>
 <footer class="foot">
   <p>Your workouts are saved on this phone.</p>
   <p class="warn" id="storeNote" hidden></p>
@@ -432,8 +482,17 @@ const RETRY_MS = 3000;
 const WRITE_TIMEOUT_MS = 10000;
 const WARN_MS = 6000;
 const CONFIRM_MS = 3000;
-const DAYS = ['upper', 'lower'];
-const DAY_NAME = { upper: 'Upper', lower: 'Lower' };
+// Workout days. Lower split into a quad day and a hamstring day on 2026-11-05; workouts from
+// before that keep day 'lower'.
+// On home they're two buttons: Upper, and Lower, which asks Quads or Hams.
+const DAYS = ['upper', 'quads', 'hams'];
+const LEG_DAYS = ['quads', 'hams'];
+const DAY_NAME = { upper: 'Upper', quads: 'Lower · Quads', hams: 'Lower · Hams', lower: 'Lower' };
+const LEG_NAME = { quads: 'Quads', hams: 'Hams' };
+// A lift's own `day` is its body part, 'upper' or 'lower' (legs). Both leg days use the leg lifts.
+const PARTS = ['upper', 'lower'];
+const PART_NAME = { upper: 'Upper', lower: 'Legs' };
+const partOfDay = (day) => (day === 'upper' ? 'upper' : 'lower');
 
 const L = (lb, reps, side) => (side ? { kind: 'lb', lb, reps, side } : { kind: 'lb', lb, reps });
 const P = (plates, extra, reps, side) => (side ? { kind: 'plates', plates, extra, reps, side } : { kind: 'plates', plates, extra, reps });
@@ -441,8 +500,24 @@ const PR = (top, mid, reps) => ({ kind: 'preacher', top, mid, reps });
 
 const STANDING = {
   upper: ['T-bar row', 'Shoulder press', 'Side delt fly', 'Pec deck', 'Unilateral lat pulldown', 'JM press', 'Rope extension', 'Rear delt fly', 'Preacher curl', 'ISO incline press', 'Converging incline press', 'Lat pulldown', 'SAG row'],
-  lower: ['Hack squat', 'Hamstring curls', 'Adductors', 'Cable crunch', 'RDL', 'Leg press'],
+  // The two leg days as Chris does them (2026-11-05): the same lifts, in a different order.
+  quads: ['Booty bounces', 'Leg extensions', 'SLDL', 'Hamstring curls', 'Adductors', 'Cable crunch'],
+  hams: ['SLDL', 'Hamstring curls', 'Booty bounces', 'Leg extensions', 'Adductors', 'Cable crunch'],
 };
+// Sets per lift on each leg day. Used only until he's done the lift on that day; after that it starts
+// as he did it there last time. Abs keep whatever he did last.
+const LEG_SETS = {
+  quads: { 'booty bounces': 2, 'leg extensions': 1, 'sldl': 1, 'hamstring curls': 1, 'adductors': 1 },
+  hams: { 'sldl': 2, 'hamstring curls': 1, 'booty bounces': 1, 'leg extensions': 1, 'adductors': 1 },
+};
+
+// The rep range he aims for (Chris, 2026-11-05): 4–6 on every lift, 8–12 on abs.
+const REP_RANGE = [4, 6];
+const REP_RANGES = { 'cable crunch': [8, 12] };
+const rangeOf = (name) => REP_RANGES[normalize(name)] || REP_RANGE;
+
+// Ideas Claude has built. The home-screen app has no database for Claude to mark them in, so it marks them itself.
+const BUILT_IDEAS = ['idea-1793303844623', 'idea-1793832557272'];
 
 const CATALOG = {
   'adductors': { name: 'Adductors', day: 'lower', track: 'lb' },
@@ -465,6 +540,9 @@ const CATALOG = {
   'lat pulldown': { name: 'Lat pulldown', day: 'upper', track: 'lb' },
   'sag row': { name: 'SAG row', day: 'upper', track: 'lb' },
   'single arm tricep extension': { name: 'Single-arm tricep extension', day: 'upper', track: 'lb' },
+  'booty bounces': { name: 'Booty bounces', day: 'lower', track: 'plates' },
+  'leg extensions': { name: 'Leg extensions', day: 'lower', track: 'lb' },
+  'sldl': { name: 'SLDL', day: 'lower', track: 'lb' },
 };
 
 // Starting numbers only. Never sessions, never chart points.
@@ -508,7 +586,7 @@ const ALIASES = {};
   [['iso incline'], 'ISO incline press'],
 ].forEach(([keys, name]) => keys.forEach((k) => { ALIASES[k] = name; }));
 
-const LOWER_NAMES = new Set(['hack squat', 'hamstring curls', 'adductors', 'cable crunch', 'rdl', 'leg press']);
+const LOWER_NAMES = new Set(['hack squat', 'hamstring curls', 'adductors', 'cable crunch', 'rdl', 'leg press', 'booty bounces', 'leg extensions', 'sldl']);
 
 const FORMATS = [['lb', 'Weight'], ['plates', 'Plates + weight'], ['stack', 'Top + bottom']];
 const FORMAT_SAMPLE = { lb: '185 × 8', plates: '2 plates and 25 × 8', stack: '50 top / 30 bottom × 8' };
@@ -535,7 +613,7 @@ function parseNum(v, int) {
 /* ---------- State ---------- */
 const S = {
   config: null,
-  live: { upper: null, lower: null, updatedAt: 0 },
+  live: { upper: null, quads: null, hams: null, updatedAt: 0 },
   sessions: {},
   ideas: {},
   nav: { screen: 'home', day: null, at: 0 },
@@ -562,6 +640,15 @@ let flushing = null;
 let flushAgain = false;
 let loading = null;
 let liveUnsub = null;
+// Rest timer. restEnd is when the running rest ends (0 = none); restLen is the last full rest he
+// used, so the next one starts there. Both are saved, so a reload mid-rest keeps counting.
+const REST_DEFAULT = 120;
+let restLen = REST_DEFAULT;
+let restEnd = 0;
+let restDoneAt = 0;
+let restTick = null;
+let wakeLock = null;
+let audioCtx = null;
 
 const ui = {
   screen: 'home', day: null, ex: null, from: null,
@@ -575,18 +662,23 @@ const ui = {
   addOpen: false, addErr: '',
   newName: '', newFmt: 'lb', newUni: false,
   delAsk: null,
+  skipped: null, // { day, i, ex }: the lift he just took off today's workout, for Undo
+  lowerOpen: false, // the Quads / Hams choice under the Lower button
+  noteEdit: null, noteDraft: '', // the lift whose note is open for typing
   ideaDraft: '', ideaSaved: false, ideaCopied: null,
   backupMsg: null, restore: null,
 };
 
 function defaultConfig() {
-  return { base: clone(STANDING), exercises: clone(CATALOG), starter: clone(STARTER), hidden: [], updatedAt: 0, v: 2 };
+  return { base: clone(STANDING), exercises: clone(CATALOG), starter: clone(STARTER), hidden: [], updatedAt: 0, v: 3 };
 }
+// `base` holds each day's list of lifts (see planNames). Before v3 it only filled in for a new day.
 function normConfig(c) {
   c = c || {};
-  const base = c.base || {};
+  const base = Object.assign({}, c.base);
+  for (const d of DAYS) if (!Array.isArray(base[d])) base[d] = clone(STANDING[d]);
   return {
-    base: { upper: base.upper || clone(STANDING.upper), lower: base.lower || clone(STANDING.lower) },
+    base,
     exercises: c.exercises || clone(CATALOG),
     starter: c.starter || {},
     hidden: Array.isArray(c.hidden) ? c.hidden : [],
@@ -600,7 +692,15 @@ function touchConfig() {
 }
 function normLive(l) {
   l = l || {};
-  return { upper: l.upper || null, lower: l.lower || null, updatedAt: l.updatedAt || 0 };
+  const out = { updatedAt: l.updatedAt || 0 };
+  for (const d of DAYS) out[d] = l[d] || null;
+  // A Lower workout left open across the update carries on as the leg day it started like.
+  if (l.lower && Array.isArray(l.lower.exercises)) {
+    const d = legDayOf({ day: 'lower', exercises: l.lower.exercises }) || 'quads', alt = d === 'quads' ? 'hams' : 'quads';
+    if (!out[d]) out[d] = l.lower;
+    else if (!out[alt]) out[alt] = l.lower;
+  }
+  return out;
 }
 
 /* ---------- Names ---------- */
@@ -618,7 +718,7 @@ function resolveName(raw, w) {
   const t = String(raw).trim().replace(/\s+/g, ' ');
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
-function dayOf(name) {
+function partOf(name) {
   const c = catOf(name);
   if (c && c.day) return c.day;
   return LOWER_NAMES.has(normalize(name)) ? 'lower' : 'upper';
@@ -759,12 +859,25 @@ function liftPoints(name) {
   return pts;
 }
 const sessionsWith = (name) => sessionsOldestFirst().filter((s) => s.exercises.some((e) => sameName(e.name, name)));
-function lastFinishedSets(name) {
+// Last time on this day if he's done the lift on it, else last time on any day. Both leg days share
+// lifts with different set counts, so Quads shows the last Quads and Hams the last Hams (an old
+// Lower workout counts as the one it started like, as on the Lower choice).
+function lastFinishedSets(name, day) {
+  let any = null;
   for (const s of sessionsNewestFirst()) {
     const e = s.exercises.find((x) => sameName(x.name, name));
-    if (e && e.sets && e.sets.length) return e.sets;
+    if (!e || !e.sets || !e.sets.length) continue;
+    if (!day || s.day === day || legDayOf(s) === day) return e.sets;
+    if (!any) any = e.sets;
   }
-  return null;
+  return any;
+}
+const doneOnDay = (name, day) => sessionsOldestFirst().some((s) => s.day === day && s.exercises.some((e) => sameName(e.name, name)));
+// First n sets; short of n, the last set repeats.
+function fitSets(sets, n) {
+  const out = sets.slice(0, n);
+  while (out.length < n) out.push(clone(out[out.length - 1]));
+  return out;
 }
 
 /* ---------- Rep prediction ---------- */
@@ -807,39 +920,58 @@ function predictReps(name, e, si) {
 }
 
 /* ---------- Building a workout ---------- */
+// Every lift on the day's list, in the order of his last workout that day. A lift stays on the list
+// until he deletes it: skipping it ("Didn't do it") or leaving it untouched never drops it.
 function planNames(day) {
-  const real = sessionsNewestFirst()
-    .filter((s) => s.source === 'app' && s.day === day)
-    .slice(0, 3)
-    .map((s) => s.exercises.map((e) => e.name));
-  const lists = real.slice();
-  while (lists.length < 3) lists.push(S.config.base[day] || []);
-  const W = [3, 2, 1];
-  const info = new Map();
-  let seen = 0;
-  lists.forEach((list, li) => {
-    const inList = new Set();
-    list.forEach((name, pos) => {
-      const k = normalize(name);
-      if (inList.has(k)) return;
-      inList.add(k);
-      let o = info.get(k);
-      if (!o) { o = { name, count: 0, wsum: 0, psum: 0, first: seen++ }; info.set(k, o); }
-      o.count++;
-      o.wsum += W[li];
-      o.psum += W[li] * pos;
-    });
-  });
   const hidden = new Set((S.config.hidden || []).map(normalize));
-  return [...info.values()]
-    .filter((o) => o.count >= 2 && !hidden.has(normalize(o.name)))
-    .sort((a, b) => a.psum / a.wsum - b.psum / b.wsum || a.first - b.first)
-    .map((o) => o.name);
+  return (S.config.base[day] || []).filter((n) => !hidden.has(normalize(n)));
+}
+
+// Today's order wins. A lift from the old list that isn't in today's goes back right after the lift
+// it followed before.
+function mergeOrder(old, today) {
+  const out = today.slice();
+  (old || []).forEach((name, i) => {
+    if (out.some((x) => sameName(x, name))) return;
+    let at = 0;
+    for (let p = i - 1; p >= 0; p--) {
+      const j = out.findIndex((x) => sameName(x, old[p]));
+      if (j >= 0) { at = j + 1; break; }
+    }
+    out.splice(at, 0, name);
+  });
+  return out;
+}
+// Every lift he's done on a day, newest workout's order first.
+function historyList(day) {
+  let list = [];
+  for (const s of sessionsNewestFirst()) if (s.day === day) list = mergeOrder(s.exercises.map((e) => e.name), list);
+  return list;
+}
+// v3 (2026-11-05): each day keeps its own list of lifts, and Lower became two leg days. Upper's list
+// is every lift he's done on upper; the leg days start from STANDING (normConfig fills them in).
+function migrateConfig() {
+  const c = S.config;
+  if ((c.v || 2) >= 3) return false;
+  const upper = historyList('upper');
+  if (upper.length) c.base.upper = upper;
+  delete c.base.lower;
+  c.v = 3;
+  touchConfig();
+  return true;
+}
+function markBuiltIdeas() {
+  for (const id of BUILT_IDEAS) {
+    const it = S.ideas[id];
+    if (it && !it.done) { it.done = true; ideaUnsynced.add(id); }
+  }
 }
 
 // Sets start as exactly what he did last time: same order, sides, weights, reps and RIR.
-function makeExercise(name) {
-  const last = lastFinishedSets(name);
+function makeExercise(name, day) {
+  let last = lastFinishedSets(name, day);
+  const n = LEG_SETS[day] && LEG_SETS[day][normalize(name)];
+  if (last && n && !doneOnDay(name, day)) last = fitSets(last, n);
   if (last) return { name, sets: last.map((s) => Object.assign(clone(s), { edited: false })), logged: false, touched: false, from: 'history' };
   const st = S.config.starter[normalize(name)];
   if (st && st.length) return { name, sets: st.map((s) => Object.assign(clone(s), { edited: false })), logged: false, touched: false, from: 'starter' };
@@ -851,7 +983,7 @@ function makeExercise(name) {
 
 function buildWorkout(day) {
   const now = Date.now();
-  return { startedAt: now, date: todayStr(), updatedAt: now, exercises: planNames(day).map(makeExercise) };
+  return { startedAt: now, date: todayStr(), updatedAt: now, exercises: planNames(day).map((n) => makeExercise(n, day)) };
 }
 
 function touchLive(day) {
@@ -881,6 +1013,11 @@ function finishWorkout(day, auto) {
     unsynced.add(session.id);
     sessionsChanged();
   }
+  // The day's list takes today's order, keeps the lifts he skipped, and picks up lifts he added and did.
+  const list = S.config.base[day] || [];
+  const kept = w.exercises.filter((e) => willSave(e) || list.some((n) => sameName(n, e.name))).map((e) => e.name);
+  S.config.base[day] = mergeOrder(list, kept);
+  touchConfig();
   S.live[day] = null;
   S.live.updatedAt = Date.now();
   dirty.live = true;
@@ -912,14 +1049,14 @@ function autoFinishStale() {
 }
 
 /* ---------- Strength index ---------- */
-function indexSeries(day) {
+function indexSeries(part) {
   const pts = [];
   const last = {};
   let idx = 100;
   for (const s of sessionsOldestFirst()) {
     const lifts = [];
     for (const e of s.exercises) {
-      if (dayOf(e.name) !== day) continue;
+      if (partOf(e.name) !== part) continue;
       const t = topOf(e.sets);
       if (t) lifts.push({ name: e.name, weight: t.weight });
     }
@@ -943,7 +1080,7 @@ function saveCache() {
     localStorage.setItem(KEY, JSON.stringify({
       config: S.config, live: S.live, sessions: S.sessions, ideas: S.ideas, nav: S.nav, dirty,
       unsynced: [...unsynced], erased: [...erased], ideaUnsynced: [...ideaUnsynced], ideaErased: [...ideaErased], ideaDraft: ui.ideaDraft,
-      lastBackup,
+      lastBackup, restLen, restEnd,
     }));
     cacheErr = false;
   } catch (e) { cacheErr = true; /* blocked or full: in the artifact the db still holds the data */ }
@@ -1139,6 +1276,8 @@ function loadFromDb() {
       else ideaUnsynced.delete(id);
     }
     S.ideas = ideas;
+    markBuiltIdeas();
+    migrateConfig();
 
     if (ls.exists) {
       const remote = normLive(clone(ls.data()));
@@ -1195,6 +1334,9 @@ function subscribeLive() {
 // Back from the lock screen or another app: check the db before he taps anything.
 function resume() {
   if (!booted) return;
+  // The phone pauses timers while the app is away: catch the rest up and take the screen lock again.
+  tickRest();
+  if (restEnd) keepAwake(true);
   if (autoFinishStale()) render();
   if (dbState === 'local') { settleLocal(); return; }
   if (!db) { if (dbState === 'offline') connect(); return; }
@@ -1260,6 +1402,9 @@ function setRoute(r) {
   ui.ex = r.ex || null;
   ui.from = r.from || null;
   ui.delAsk = null;
+  ui.skipped = null;
+  ui.noteEdit = null;
+  ui.noteDraft = '';
   ui.ideaSaved = false;
   ui.ideaCopied = null;
   ui.backupMsg = null;
@@ -1387,6 +1532,10 @@ const ICON_BACK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 const ICON_GRIP = '<svg width="14" height="18" viewBox="0 0 14 18" fill="currentColor" aria-hidden="true"><circle cx="4" cy="3" r="1.6"/><circle cx="10" cy="3" r="1.6"/><circle cx="4" cy="9" r="1.6"/><circle cx="10" cy="9" r="1.6"/><circle cx="4" cy="15" r="1.6"/><circle cx="10" cy="15" r="1.6"/></svg>';
 const ICON_CHART = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>';
 const ICON_TRASH = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
+const ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const ICON_NOTE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14 7l3 3"/></svg>';
+const ICON_TIMER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
+const ICON_UP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>';
 const livePill = () => '<span class="live"><i></i>Live</span>';
 const saveWarnHtml = () => '<div class="save-warn" id="saveWarn" role="alert" hidden><span></span><button class="txt" data-act="retry-save">Retry now</button></div>';
 const ICON_IDEA = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
@@ -1413,32 +1562,63 @@ function render() {
   mountCharts();
   updateSaveNote();
   updateStoreNote();
+  renderRest();
   if (fid) { const el = document.getElementById(fid); if (el) el.focus({ preventScroll: true }); }
 }
 
-function renderHome() {
-  const tiles = DAYS.map((day) => {
-    const w = S.live[day];
-    if (w) {
-      const x = w.exercises.filter(willSave).length;
-      return `<button class="tile is-live" data-act="open-day" data-day="${day}"><span class="tile-top"><span class="tile-name">${DAY_NAME[day]}</span>${livePill()}</span><span class="tile-sub">In progress · ${x} of ${w.exercises.length} logged</span></button>`;
-    }
-    return `<button class="tile" data-act="open-day" data-day="${day}"><span class="tile-name">${DAY_NAME[day]}</span><span class="tile-sub">${plural(planNames(day).length, 'exercise')}</span></button>`;
-  }).join('');
+const liveTile = (day, name, w) => {
+  const x = w.exercises.filter(willSave).length;
+  const which = LEG_NAME[day] ? `${LEG_NAME[day]} · ` : 'In progress · ';
+  return `<button class="tile is-live" data-act="open-day" data-day="${day}"><span class="tile-top"><span class="tile-name">${name}</span>${livePill()}</span><span class="tile-sub">${which}${x} of ${w.exercises.length} logged</span></button>`;
+};
+// Which leg day a workout was. Old Lower workouts count as the leg day they started with (Quads
+// starts with Booty bounces, Hams with SLDL); one that started any other way counts as neither.
+function legDayOf(s) {
+  if (LEG_NAME[s.day]) return s.day;
+  if (s.day !== 'lower' || !s.exercises.length) return null;
+  return LEG_DAYS.find((d) => sameName(STANDING[d][0], s.exercises[0].name)) || null;
+}
+const lastLegSession = (day) => sessionsNewestFirst().find((s) => legDayOf(s) === day);
 
-  const newest = sessionsNewestFirst().find((s) => s.day === 'upper' || s.day === 'lower');
+// Lower asks Quads or Hams, and shows what he did last time on each.
+function lowerPickHtml(next) {
+  if (!ui.lowerOpen) return '';
+  return `<section class="leg-pick" aria-label="Which lower day">${LEG_DAYS.map((d) => {
+    const w = S.live[d];
+    const s = lastLegSession(d);
+    const when = w ? `In progress · ${w.exercises.filter(willSave).length} of ${w.exercises.length} logged` : s ? `Last time: ${fmtDate(s.date)}` : 'First time';
+    const lifts = !w && s ? `<span class="leg-lifts">${s.exercises.map((e) => `<span><span class="pb-name">${esc(e.name)}</span><span class="pb-sets">${esc(setsText(e.sets))}</span></span>`).join('')}</span>` : '';
+    const tag = w ? livePill() : d === next ? '<span class="badge is-new">Next</span>' : '';
+    return `<button class="card leg-opt${w ? ' is-live' : ''}" data-act="open-day" data-day="${d}"><span class="leg-head"><span class="tile-name">${LEG_NAME[d]}</span>${tag}</span><span class="tile-sub">${when}</span>${lifts}</button>`;
+  }).join('')}</section>`;
+}
+
+function renderHome() {
+  const upperW = S.live.upper;
+  const upperTile = upperW ? liveTile('upper', 'Upper', upperW)
+    : `<button class="tile" data-act="open-day" data-day="upper"><span class="tile-name">Upper</span><span class="tile-sub">${plural(planNames('upper').length, 'exercise')}</span></button>`;
+  // A leg day in progress opens straight from Lower. Two at once (rare) go through the choice.
+  const liveLegs = LEG_DAYS.filter((d) => S.live[d]);
+  const lowerTile = liveLegs.length === 1 ? liveTile(liveLegs[0], 'Lower', S.live[liveLegs[0]])
+    : `<button class="tile${ui.lowerOpen ? ' is-open' : ''}" data-act="lower-pick" aria-expanded="${ui.lowerOpen}"><span class="tile-name">Lower</span><span class="tile-sub">Quads or hams</span></button>`;
+  const tiles = upperTile + lowerTile;
+
+  // Upper and lower take turns, and Quads and Hams take turns with each other.
+  const newest = sessionsNewestFirst()[0];
+  const lastLeg = sessionsNewestFirst().find(legDayOf);
+  const nextLeg = lastLeg && legDayOf(lastLeg) === 'quads' ? 'hams' : 'quads';
   let hint = '';
   if (newest) {
-    if (newest.day === 'upper') hint = 'Split says <b>Lower</b>';
-    else if (newest.date === yesterdayStr()) hint = "Split says <b>rest day</b> — pick either if you're training";
+    if (newest.day === 'upper') hint = `Split says <b>Lower · ${LEG_NAME[nextLeg]}</b>`;
+    else if (newest.date === yesterdayStr()) hint = "Split says <b>rest day</b> — pick any if you're training";
     else hint = 'Split says <b>Upper</b>';
   }
 
-  const charts = DAYS.map((day) => {
-    const pts = indexSeries(day);
-    const title = `${DAY_NAME[day]} weights`;
+  const charts = PARTS.map((part) => {
+    const pts = indexSeries(part);
+    const title = part === 'upper' ? 'Upper weights' : 'Leg weights';
     if (!pts.length) return `<section class="card"><div class="cc-head"><h3 class="cc-title">${title}</h3></div><p class="empty">No data yet.</p></section>`;
-    const id = 'idx-' + day;
+    const id = 'idx-' + part;
     const sel = registerChart(id, {
       values: pts.map((p) => p.value), dates: pts.map((p) => p.date), minSpan: 4, height: 150,
       label: `${title} index`, detail: (i) => idxDetail(pts, i),
@@ -1453,10 +1633,10 @@ function renderHome() {
 
   const prog = progressionLifts();
   let progHtml = '';
-  for (const day of DAYS) {
-    const lifts = prog.filter((p) => p.day === day);
+  for (const part of PARTS) {
+    const lifts = prog.filter((p) => p.part === part);
     if (!lifts.length) continue;
-    progHtml += `<div class="stack-sm"><p class="sub-label">${DAY_NAME[day]}</p>${lifts.map((l) => {
+    progHtml += `<div class="stack-sm"><p class="sub-label">${PART_NAME[part]}</p>${lifts.map((l) => {
       const last = l.pts[l.pts.length - 1];
       return `<button class="prog" data-act="open-ex" data-name="${esc(l.name)}"><span class="prog-l"><span class="prog-name">${esc(l.name)}</span><span class="prog-last">top set ${esc(setText(last.best))}</span></span>` +
         `<span class="prog-r">${sparkSVG(l.pts.map((p) => p.weight), l.name + ' top weight')}<span class="prog-score">${esc(weightText(last.best))}</span></span></button>`;
@@ -1473,11 +1653,12 @@ function renderHome() {
   const nudge = LOCAL && isStandalone() && backupDue()
     ? `<p class="hint"><button class="txt" data-act="backup">${lastBackup ? `Last backup was ${backupAge()} days ago. Back up now` : 'Back up your workouts'} →</button></p>` : '';
 
-  return `<header class="home-head"><div><h1 class="title">Gym</h1><p class="tagline">Upper · lower · rest</p></div>${ideaBtn()}</header>
+  return `<header class="home-head"><div><h1 class="title">Gym</h1><p class="tagline">Upper · legs · rest</p></div>${ideaBtn()}</header>
     ${installHtml()}
     ${freshPhone() ? backupHtml() : ''}
     ${saveWarnHtml()}
     <div class="tiles">${tiles}</div>
+    ${lowerPickHtml(nextLeg)}
     ${hint ? `<p class="hint">${hint}</p>` : ''}
     ${nudge}
     ${ui.toast ? `<p class="toast" role="status">${esc(ui.toast)}</p>` : ''}
@@ -1577,11 +1758,13 @@ function applyRestore() {
   try { localStorage.setItem(KEY + '-before-restore', localStorage.getItem(KEY) || ''); } catch (e) { /* no room: the restore still goes ahead */ }
   const d = r.data;
   S.config = normConfig(d.config);
-  S.live = normLive(d.live);
   S.sessions = d.sessions;
-  S.ideas = d.ideas && typeof d.ideas === 'object' ? d.ideas : {};
-  lastBackup = d.exportedAt || Date.now();
   sessionsChanged();
+  migrateConfig();
+  S.live = normLive(d.live);
+  S.ideas = d.ideas && typeof d.ideas === 'object' ? d.ideas : {};
+  markBuiltIdeas();
+  lastBackup = d.exportedAt || Date.now();
   autoFinishStale();
   ui.restore = null;
   ui.backupMsg = { text: `Restored ${plural(r.count, 'workout')}.` };
@@ -1609,13 +1792,14 @@ function progressionLifts() {
     const k = normalize(e.name);
     if (!names.has(k) && topOf(e.sets)) names.set(k, e.name);
   }
+  const b = S.config.base;
+  const order = { upper: b.upper || [], lower: [...(b.quads || []), ...(b.hams || [])] };
   const rank = (name) => {
-    const d = dayOf(name);
-    const i = (S.config.base[d] || []).findIndex((n) => sameName(n, name));
+    const i = (order[partOf(name)] || []).findIndex((n) => sameName(n, name));
     return i < 0 ? 1000 : i;
   };
   return [...names.values()]
-    .map((name) => ({ name, day: dayOf(name), pts: liftPoints(name) }))
+    .map((name) => ({ name, part: partOf(name), pts: liftPoints(name) }))
     .filter((l) => l.pts.length)
     .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
 }
@@ -1637,14 +1821,17 @@ function loadDisplay(s) {
   return { html: `<span class="v1 num">${fmt(s.lb)}</span>${side ? `<span class="v2">${side}</span>` : ''}`, cls: '' };
 }
 
-function setRowInner(s, i, si) {
+// A set that hit the top of the range last time lights up its + weight button.
+const atTop = (e, s) => e.from === 'history' && !s.edited && !s.q && s.reps != null && s.reps >= rangeOf(e.name)[1];
+function setRowInner(s, i, si, e) {
   const ld = loadDisplay(s);
   const guess = s.q && s.reps != null;
   const reps = s.reps == null ? '<span class="v1">–</span>' : `<span class="v1">${s.reps}</span>${guess ? '<span class="v2">guess</span>' : ''}`;
   const at = `data-i="${i}" data-si="${si}"`;
+  const up = e && atTop(e, s);
   return `<div class="cl cl-w"><button class="step" data-act="w-step" ${at} data-d="-1" aria-label="Less weight">−</button>` +
     `<button class="val val-load ${ld.cls}" data-act="edit" data-f="load" ${at} aria-label="Weight: ${esc(hasLoad(s) ? loadText(s) : 'empty')}. Tap to type.">${ld.html}</button>` +
-    `<button class="step" data-act="w-step" ${at} data-d="1" aria-label="More weight">+</button></div>` +
+    `<button class="step${up ? ' nudge' : ''}" data-act="w-step" ${at} data-d="1" aria-label="More weight${up ? ', you hit the top of your range last time' : ''}">+</button></div>` +
     `<div class="cl cl-r"><button class="step" data-act="r-step" ${at} data-d="-1" aria-label="One less rep">−</button>` +
     `<button class="val val-reps${guess ? ' is-guess' : ''}${s.reps == null ? ' is-empty' : ''}" data-act="edit" data-f="reps" ${at} aria-label="Reps: ${s.reps == null ? 'empty' : s.reps + (guess ? ', predicted' : '')}. Tap to type.">${reps}</button>` +
     `<button class="step" data-act="r-step" ${at} data-d="1" aria-label="One more rep">+</button></div>` +
@@ -1672,9 +1859,9 @@ function editorHtml(s) {
 const isEditing = (i, si) => !!(ui.editing && ui.editing.day === ui.day && ui.editing.i === i && ui.editing.si === si);
 const isConfirm = (key) => !!(ui.confirm && ui.confirm.key === key);
 
+// Tapping it is what marks a lift done (Logged); changing numbers alone never does.
 function badgeHtml(e) {
-  const [label, cls] = e.logged ? ['Logged', 'is-logged'] : e.from ? ['Last time', 'is-last'] : ['New', 'is-new'];
-  return `<span class="badge ${cls}">${label}</span>`;
+  return e.logged ? `<span class="done-mark is-done">${ICON_CHECK}Done</span>` : `<span class="done-mark"><i></i>Done</span>`;
 }
 
 function renderExCard(e, i) {
@@ -1697,23 +1884,39 @@ function renderExCard(e, i) {
       FORMATS.map(([f, label]) => `<button class="pill" data-act="pick-track" data-i="${i}" data-track="${f}">${label}</button>`).join('') +
       `<button class="pill${e.uni ? ' on' : ''}" data-act="pick-uni" data-i="${i}" aria-pressed="${!!e.uni}">Left / right</button></div></div>`;
   } else {
-    body = sideLine(e, i) + `<div class="sets">${e.sets.map((s, si) => `<div class="set" data-row="${i}-${si}">${setRowInner(s, i, si)}</div>${isEditing(i, si) ? editorHtml(s) : ''}`).join('')}</div>`;
+    body = sideLine(e, i) + `<div class="range-slot">${rangeLine(e)}</div>` +
+      `<div class="sets">${e.sets.map((s, si) => `<div class="set" data-row="${i}-${si}">${setRowInner(s, i, si, e)}</div>${isEditing(i, si) ? editorHtml(s) : ''}`).join('')}</div>`;
   }
   const rmOn = isConfirm('rm-' + i);
   const foot = `<div class="ex-foot">${e.sets.length ? `<button class="txt" data-act="add-set" data-i="${i}">+ Add set</button>` : ''}<span class="foot-r">` +
     (e.sets.length > 1 ? `<button class="txt muted" data-act="remove-set" data-i="${i}">Remove set</button>` : '') +
-    `<button class="txt ${rmOn ? 'danger' : 'muted'}" data-act="remove-ex" data-i="${i}">${rmOn ? 'Tap again to remove' : 'Remove'}</button></span></div>`;
+    `<button class="txt${rmOn ? ' danger' : ''}" data-act="remove-ex" data-i="${i}">${rmOn ? 'Tap again to skip' : "Didn't do it"}</button></span></div>`;
+  const noNote = !noteOf(e.name) && !isNoteEdit(e.name);
   return `<article class="card ex${e.logged ? ' is-logged' : ''}" data-ex="${i}"><div class="ex-head"><span class="grip" aria-hidden="true">${ICON_GRIP}</span><div class="ex-name">${esc(e.name)}</div><div class="ex-tools">` +
+    (noNote ? `<button class="icon-btn" data-act="note-edit" data-name="${esc(e.name)}" aria-label="Add a note to ${esc(e.name)}">${ICON_NOTE}</button>` : '') +
     (pts.length ? `<button class="icon-btn${open ? ' on' : ''}" data-act="chart-toggle" data-i="${i}" aria-pressed="${open}" aria-label="${open ? 'Hide' : 'Show'} ${esc(e.name)} chart">${ICON_CHART}</button>` : '') +
-    `<button class="badge-btn" data-act="toggle-logged" data-i="${i}" aria-pressed="${!!e.logged}" aria-label="Toggle logged for ${esc(e.name)}">${badgeHtml(e)}</button></div></div>` +
-    chart + body + foot + '</article>';
+    `<button class="badge-btn" data-act="toggle-logged" data-i="${i}" aria-pressed="${!!e.logged}" aria-label="${esc(e.name)} done">${badgeHtml(e)}</button></div></div>` +
+    noteHtml(e.name) + chart + body + foot + '</article>';
+}
+
+// Top of the rep range means it's time to add weight: today if he hit it last time, next time if he
+// hits it today. Predicted reps (guesses) don't count.
+function rangeLine(e) {
+  const [lo, hi] = rangeOf(e.name);
+  const list = (pick) => e.sets.map((s, si) => (pick(s) ? si + 1 : 0)).filter(Boolean);
+  const sets = (l) => (l.length === 1 ? `set ${l[0]}` : `sets ${l.slice(0, -1).join(', ')} and ${l[l.length - 1]}`);
+  const last = list((s) => atTop(e, s));
+  if (last.length) return `<p class="range-line">${ICON_UP}<span>Top of ${lo}–${hi} on ${sets(last)} last time. Add weight.</span></p>`;
+  const today = list((s) => s.edited && !s.q && s.reps != null && s.reps >= hi);
+  if (today.length) return `<p class="range-line">${ICON_UP}<span>Top of ${lo}–${hi} on ${sets(today)}. Add weight next time.</span></p>`;
+  return '';
 }
 
 // Left/right lifts: which side went first last time, and a swap so today's order is what he did.
 function sideLine(e, i) {
   if (!e.sets.some((s) => s.side === 'left') || !e.sets.some((s) => s.side === 'right')) return '';
   const first = e.sets.find((s) => s.side).side;
-  const prev = lastFinishedSets(e.name);
+  const prev = lastFinishedSets(e.name, ui.day);
   const was = prev && (prev.find((s) => s.side) || {}).side;
   const label = was ? `Last time: ${was} first${was !== first ? ` · today: ${first} first` : ''}` : `${first.charAt(0).toUpperCase() + first.slice(1)} first`;
   return `<div class="side-line"><span>${label}</span><button class="txt" data-act="swap-sides" data-i="${i}">Start with ${otherSide(first)}</button></div>`;
@@ -1737,16 +1940,60 @@ function renderWorkout() {
     ${saveWarnHtml()}
     <div class="w-title"><h1 class="h-day">${DAY_NAME[day]}</h1>${livePill()}${cancelBtn(w)}</div>
     <p class="w-hint">Tap a number to type it. Drag ${ICON_GRIP} to move a lift.</p>
-    <div class="ex-list">${w.exercises.map(renderExCard).join('')}</div>
+    <div class="ex-list">${cardsWithSkipNote(day, w)}</div>
     <button class="btn-ghost" data-act="add-exercise">+ Add exercise</button>
     <button class="btn-primary${cs.on ? ' is-confirm' : ''}" id="completeBtn" data-act="complete">${cs.label}</button>`;
+}
+
+// A note on a lift (seat height, pin, cues) shows on its card every time. It's kept with the lift in
+// the exercise list, so backups carry it.
+const noteOf = (name) => { const c = catOf(name); return (c && c.note) || ''; };
+const isNoteEdit = (name) => ui.noteEdit != null && sameName(ui.noteEdit, name);
+function noteHtml(name) {
+  if (isNoteEdit(name)) {
+    return `<div class="note-edit"><textarea class="field" id="note-text" rows="2" maxlength="300" placeholder="Like: seat 4, pin 7, elbows in" aria-label="Note for ${esc(name)}">${esc(ui.noteDraft)}</textarea>` +
+      `<div class="note-btns"><button class="btn-primary" data-act="note-save" data-name="${esc(name)}">Save note</button><button class="txt muted" data-act="note-cancel">Cancel</button></div></div>`;
+  }
+  const n = noteOf(name);
+  return n ? `<button class="ex-note" data-act="note-edit" data-name="${esc(name)}" aria-label="Note: ${esc(n)}. Tap to change.">${ICON_NOTE}<span>${esc(n)}</span></button>` : '';
+}
+function openNote(name) {
+  ui.noteEdit = name;
+  ui.noteDraft = noteOf(name);
+  render();
+  const el = document.getElementById('note-text');
+  if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+}
+function saveNote(name) {
+  const el = document.getElementById('note-text');
+  const text = (el ? el.value : ui.noteDraft).trim().slice(0, 300);
+  const k = normalize(name);
+  const c = S.config.exercises[k] || (S.config.exercises[k] = { name, day: partOf(name) });
+  if (text) c.note = text; else delete c.note;
+  ui.noteEdit = null;
+  ui.noteDraft = '';
+  touchConfig();
+  saveCache();
+  scheduleFlush();
+  render();
+}
+
+// A skipped lift leaves a note where its card was, until his next tap.
+function cardsWithSkipNote(day, w) {
+  const cards = w.exercises.map(renderExCard);
+  const k = ui.skipped;
+  if (k && k.day === day) {
+    cards.splice(Math.min(k.i, cards.length), 0, `<div class="skip-note" role="status"><span><b>${esc(k.ex.name)}</b> is off today. It's back next ${DAY_NAME[day]}.</span><button class="txt" data-act="undo-skip">Undo</button></div>`);
+  }
+  return cards.join('');
 }
 
 function renderExercise() {
   const name = ui.ex;
   const pts = liftPoints(name);
   const backLabel = ui.from === 'workout' && ui.day && S.live[ui.day] ? `${DAY_NAME[ui.day]} workout` : 'Gym';
-  const head = `<div class="topbar"><button class="back" data-act="back">${ICON_BACK}${backLabel}</button><span class="day-badge">${DAY_NAME[dayOf(name)]}</span></div><h1 class="h-day">${esc(name)}</h1>`;
+  const head = `<div class="topbar"><button class="back" data-act="back">${ICON_BACK}${backLabel}</button><span class="day-badge">${PART_NAME[partOf(name)]}</span></div><h1 class="h-day">${esc(name)}</h1>` +
+    (noteOf(name) || isNoteEdit(name) ? noteHtml(name) : `<div><button class="txt" data-act="note-edit" data-name="${esc(name)}">${ICON_NOTE}&nbsp;Add a note</button></div>`);
   const note = '<p class="note">Each point is the heaviest weight you used that day, in pounds (a plate counts as 45). Reps only break a tie. Tap a point or a workout below.</p>';
   const del = `<section class="stack-sm">${ui.delAsk && sameName(ui.delAsk, name) ? delPanel(name) : `<div><button class="txt danger" data-act="del-ask" data-name="${esc(name)}">Delete ${esc(name)}</button></div>`}</section>`;
   if (!pts.length) return `${head}<section class="card"><p class="empty">No sets logged for ${esc(name)} yet.</p></section>${note}${del}`;
@@ -1798,18 +2045,18 @@ function renderAdd() {
   const day = ui.day, w = S.live[day];
   const inW = new Set(w.exercises.map((e) => normalize(e.name)));
   const items = Object.entries(S.config.exercises)
-    .filter(([k, c]) => dayOf(c.name) === day && !inW.has(k))
+    .filter(([k, c]) => partOf(c.name) === partOfDay(day) && !inW.has(k))
     .map(([, c]) => c.name)
     .sort((a, b) => a.localeCompare(b));
   const lastLine = (name) => {
-    const sets = lastFinishedSets(name) || S.config.starter[normalize(name)];
+    const sets = lastFinishedSets(name, day) || S.config.starter[normalize(name)];
     return sets && sets.length ? 'Last: ' + setsText(sets) : 'No data yet';
   };
   const list = items.length
     ? items.map((name) => `<div class="add-item"><button class="add-row" data-act="add-cat" data-name="${esc(name)}"><span class="ar-name">${esc(name)}</span><span class="ar-last">${esc(lastLine(name))}</span></button>` +
       `<button class="icon-btn add-del" data-act="del-ask" data-name="${esc(name)}" aria-label="Delete ${esc(name)}">${ICON_TRASH}</button></div>` +
       (ui.delAsk && sameName(ui.delAsk, name) ? delPanel(name) : '')).join('')
-    : `<p class="note">Every ${day} exercise is already in this workout.</p>`;
+    : `<p class="note">Every ${partOfDay(day) === 'upper' ? 'upper' : 'leg'} exercise is already in this workout.</p>`;
   const sample = FORMAT_SAMPLE[ui.newFmt] || FORMAT_SAMPLE.lb;
   const form = ui.addOpen
     ? `<div class="new-form card"><input class="field" id="new-ex-name" type="text" value="${esc(ui.newName)}" placeholder="Exercise name" autocapitalize="words" autocomplete="off" enterkeyhint="done" aria-label="Exercise name">` +
@@ -1908,9 +2155,11 @@ function patchRow(i, si) {
   const e = w && w.exercises[i];
   if (!e) return;
   const row = document.querySelector(`[data-row="${i}-${si}"]`);
-  if (row) row.innerHTML = setRowInner(e.sets[si], i, si);
+  if (row) row.innerHTML = setRowInner(e.sets[si], i, si, e);
   const card = document.querySelector(`[data-ex="${i}"]`);
   if (card) {
+    const r = card.querySelector('.range-slot');
+    if (r) r.innerHTML = rangeLine(e);
     card.classList.toggle('is-logged', !!e.logged);
     const b = card.querySelector('.badge-btn');
     if (b) { b.innerHTML = badgeHtml(e); b.setAttribute('aria-pressed', String(!!e.logged)); }
@@ -2006,7 +2255,7 @@ function addSet(i) {
     n = Object.assign(clone(src || last), { edited: false });
     if (side) n.side = side;
     // If last time had a set in this spot, show exactly that.
-    const prev = lastFinishedSets(e.name);
+    const prev = lastFinishedSets(e.name, day);
     if (prev) {
       const k = sideKey(n);
       const same = prev.filter((s) => sideKey(s) === k);
@@ -2030,15 +2279,28 @@ function removeSet(i) {
   touchLive(day);
   render();
 }
+// "Didn't do it": off today's workout only, it stays on the day's list. One tap, unless he already
+// changed or logged it today, since those numbers go with it.
 function removeExercise(i) {
+  const { day, w, e } = ctx(i);
+  if (!w || !e) return;
   const key = 'rm-' + i;
-  if (!isConfirm(key)) { armConfirm(key); return; }
+  if ((e.touched || e.logged) && !isConfirm(key)) { armConfirm(key); return; }
   clearConfirm();
-  const { day, w } = ctx(i);
-  if (!w) return;
   const [gone] = w.exercises.splice(i, 1);
   if (gone && w.cur === normalize(gone.name)) w.cur = i > 0 ? normalize(w.exercises[i - 1].name) : null;
+  ui.skipped = { day, i, ex: gone };
   touchLive(day);
+  render();
+}
+function undoSkip() {
+  const k = ui.skipped;
+  ui.skipped = null;
+  const w = k && S.live[k.day];
+  if (w && !w.exercises.some((e) => sameName(e.name, k.ex.name))) {
+    w.exercises.splice(Math.min(k.i, w.exercises.length), 0, k.ex);
+    touchLive(k.day);
+  }
   render();
 }
 function pickTrack(i, track) {
@@ -2048,7 +2310,7 @@ function pickTrack(i, track) {
   const uni = !!e.uni;
   const c = S.config.exercises[k];
   if (c) Object.assign(c, { track, uni });
-  else S.config.exercises[k] = { name: e.name, day, track, uni };
+  else S.config.exercises[k] = { name: e.name, day: partOfDay(day), track, uni };
   touchConfig();
   delete e.uni;
   e.sets = blankSets(track, uni);
@@ -2087,6 +2349,7 @@ function cancelWorkout() {
 }
 function openDay(day) {
   ui.toast = null;
+  ui.lowerOpen = false;
   if (!S.live[day]) {
     S.live[day] = buildWorkout(day);
     touchLive(day);
@@ -2098,7 +2361,7 @@ function addToWorkout(name) {
   const day = ui.day, w = S.live[day];
   if (!w) return;
   const i = w.exercises.findIndex((x) => normalize(x.name) === w.cur) + 1;
-  w.exercises.splice(i, 0, makeExercise(name));
+  w.exercises.splice(i, 0, makeExercise(name, day));
   w.cur = normalize(name);
   touchLive(day);
   back();
@@ -2120,7 +2383,7 @@ function addNewExercise() {
   if (w.exercises.some((e) => sameName(e.name, name))) { showAddErr(`${name} is already in this workout.`); return; }
   const k = normalize(name);
   const c = S.config.exercises[k];
-  if (!c) S.config.exercises[k] = { name, day, track: ui.newFmt, uni: ui.newUni };
+  if (!c) S.config.exercises[k] = { name, day: partOfDay(day), track: ui.newFmt, uni: ui.newUni };
   else if (!c.track) Object.assign(c, { track: ui.newFmt, uni: ui.newUni });
   S.config.hidden = (S.config.hidden || []).filter((h) => normalize(h) !== k);
   touchConfig();
@@ -2132,7 +2395,7 @@ function deleteExercise(name, erase) {
   const k = normalize(name);
   delete S.config.exercises[k];
   delete S.config.starter[k];
-  for (const d of DAYS) S.config.base[d] = (S.config.base[d] || []).filter((n) => normalize(n) !== k);
+  for (const d of Object.keys(S.config.base)) S.config.base[d] = (S.config.base[d] || []).filter((n) => normalize(n) !== k);
   if (!(S.config.hidden || []).some((h) => normalize(h) === k)) S.config.hidden = [...(S.config.hidden || []), name];
   touchConfig();
   let liveChanged = false;
@@ -2252,6 +2515,132 @@ function onEditorInput(el) {
   patchRow(ed.i, ed.si);
 }
 
+/* ---------- Rest timer ---------- */
+// A bar at the bottom of the screen. On a workout it waits as a Rest button; once started it shows on
+// every screen until it runs out. It keeps the screen awake while it counts (where the phone allows),
+// and beeps at the end if the app is open and the phone isn't on silent.
+const fmtRest = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+const restLeft = () => Math.max(0, Math.ceil((restEnd - Date.now()) / 1000));
+function renderRest() {
+  const el = document.getElementById('rest');
+  if (!el) return;
+  let html = '';
+  if (restEnd) {
+    const left = restLeft();
+    html = `<div class="rest-bar is-running" role="timer" aria-label="Rest timer"><div class="rest-main"><span class="rest-k">Rest</span><span class="rest-time" id="restTime">${fmtRest(left)}</span></div>` +
+      `<div class="rest-btns"><button class="rest-b" data-rest="-30" aria-label="30 seconds less">−30</button><button class="rest-b" data-rest="30" aria-label="30 seconds more">+30</button><button class="rest-b stop" data-rest="stop">Stop</button></div>` +
+      `<i class="rest-prog" id="restProg" style="transform: scaleX(${Math.min(1, left / restLen).toFixed(3)})"></i></div>`;
+  } else if (restDoneAt) {
+    html = `<div class="rest-bar is-done" role="status"><div class="rest-main"><span class="rest-k">Rest's over</span><span class="rest-time">Next set</span></div><div class="rest-btns"><button class="rest-b" data-rest="ok">OK</button></div></div>`;
+  } else if (ui.screen === 'workout' && S.live[ui.day]) {
+    html = `<button class="rest-start" data-rest="start">${ICON_TIMER}Rest ${fmtRest(restLen)}</button>`;
+  }
+  el.innerHTML = html;
+  el.hidden = !html;
+  document.body.classList.toggle('has-rest', !!html);
+}
+function tickRest() {
+  if (!restEnd) return;
+  const over = Date.now() - restEnd;
+  if (over >= 0) {
+    restEnd = 0;
+    restDoneAt = Date.now();
+    clearInterval(restTick);
+    restTick = null;
+    keepAwake(false);
+    if (over < 60000) ring();
+    saveCache();
+    renderRest();
+    setTimeout(() => { if (restDoneAt && Date.now() - restDoneAt >= 59000) { restDoneAt = 0; renderRest(); } }, 60000);
+    return;
+  }
+  const t = document.getElementById('restTime');
+  const p = document.getElementById('restProg');
+  if (!t) { renderRest(); return; }
+  t.textContent = fmtRest(restLeft());
+  if (p) p.style.transform = `scaleX(${Math.min(1, restLeft() / restLen).toFixed(3)})`;
+}
+function runRest() {
+  clearInterval(restTick);
+  restTick = restEnd ? setInterval(tickRest, 250) : null;
+  if (restEnd) keepAwake(true);
+}
+function startRest() {
+  unlockAudio();
+  restEnd = Date.now() + restLen * 1000;
+  restDoneAt = 0;
+  saveCache();
+  runRest();
+  renderRest();
+}
+// Changes this rest and the next ones. Taking it to zero just ends it, with no beep, and leaves the
+// next rest's length alone.
+function moveRest(sec) {
+  if (!restEnd) return;
+  if (restEnd + sec * 1000 <= Date.now()) { stopRest(); return; }
+  restLen = Math.min(600, Math.max(15, restLen + sec));
+  restEnd += sec * 1000;
+  saveCache();
+  tickRest();
+}
+function stopRest() {
+  restEnd = 0;
+  restDoneAt = 0;
+  runRest();
+  keepAwake(false);
+  saveCache();
+  renderRest();
+}
+async function keepAwake(on) {
+  try {
+    if (on && !wakeLock && navigator.wakeLock && document.visibilityState === 'visible') {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!on && wakeLock) {
+      const w = wakeLock;
+      wakeLock = null;
+      await w.release();
+    }
+  } catch (e) { wakeLock = null; /* not offered, or the phone said no */ }
+}
+// iPhone only plays sound from a page after a tap, so the Rest tap opens the audio for the beep later.
+function unlockAudio() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state !== 'running') audioCtx.resume();
+  } catch (e) { audioCtx = null; }
+}
+function ring() {
+  try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) { /* no vibration on iPhone */ }
+  if (!audioCtx) return;
+  try {
+    if (audioCtx.state !== 'running') audioCtx.resume();
+    const t0 = audioCtx.currentTime + 0.05;
+    [0, 0.28, 0.56].forEach((d) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, t0 + d);
+      g.gain.exponentialRampToValueAtTime(0.35, t0 + d + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.2);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0 + d);
+      o.stop(t0 + d + 0.22);
+    });
+  } catch (e) { /* no sound */ }
+}
+function onRestClick(ev) {
+  const b = ev.target.closest('[data-rest]');
+  if (!b) return;
+  const a = b.dataset.rest;
+  if (a === 'start') startRest();
+  else if (a === 'stop') stopRest();
+  else if (a === 'ok') { restDoneAt = 0; renderRest(); }
+  else moveRest(+a);
+}
+
 /* ---------- Events ---------- */
 let suppressClick = false;
 
@@ -2271,9 +2660,16 @@ function onClick(ev) {
   // Every other action closes the editor first.
   const hadEditor = closeEditor();
   if (a !== 'complete' && a !== 'remove-ex' && a !== 'idea-del' && a !== 'cancel-workout') clearConfirm();
+  if (a === 'undo-skip') { undoSkip(); return; }
+  const hadSkip = !!ui.skipped;
+  ui.skipped = null;
 
   switch (a) {
     case 'open-day': openDay(t.dataset.day); break;
+    case 'lower-pick': ui.lowerOpen = !ui.lowerOpen; ui.toast = null; render(); break;
+    case 'note-edit': openNote(t.dataset.name); break;
+    case 'note-save': saveNote(t.dataset.name); break;
+    case 'note-cancel': ui.noteEdit = null; ui.noteDraft = ''; render(); break;
     case 'back': back(); break;
     case 'toggle-past': ui.pastOpen = !ui.pastOpen; render(); break;
     case 'past-item': {
@@ -2342,7 +2738,7 @@ function onClick(ev) {
       if (el) el.focus();
       break;
     }
-    default: if (hadEditor) render();
+    default: if (hadEditor || hadSkip) render();
   }
 }
 
@@ -2358,6 +2754,7 @@ function onInput(ev) {
     saveCache();
     return;
   }
+  if (el.id === 'note-text') { ui.noteDraft = el.value; return; }
   if (el.id === 'new-ex-name') {
     ui.newName = el.value;
     if (ui.addErr) {
@@ -2406,6 +2803,14 @@ function onDragMove(ev) {
 }
 function beginDrag(card, p) {
   if (closeEditor() || ui.confirm) { clearConfirm(); render(); return; }
+  if (ui.skipped) {
+    // The note would throw off where the cards sit, so it goes before the drag measures them.
+    const n = card.dataset.ex;
+    ui.skipped = null;
+    render();
+    card = document.querySelector(`#app .ex[data-ex="${n}"]`);
+    if (!card) return;
+  }
   const cards = [...document.querySelectorAll('#app .ex')];
   const idx = cards.indexOf(card);
   if (idx < 0) return;
@@ -2491,6 +2896,8 @@ function bindEvents() {
   setInterval(updateSaveNote, 2000);
   const rf = document.getElementById('restore-file');
   if (rf) rf.addEventListener('change', onRestoreFile);
+  const rest = document.getElementById('rest');
+  if (rest) rest.addEventListener('click', onRestClick);
 }
 
 /* ---------- Boot ---------- */
@@ -2498,8 +2905,10 @@ function boot() {
   const c = loadCache();
   if (c && c.config) {
     S.config = normConfig(c.config);
-    S.live = normLive(c.live);
     S.sessions = c.sessions || {};
+    sessionsChanged();
+    migrateConfig();
+    S.live = normLive(c.live);
     S.nav = c.nav || S.nav;
     Object.assign(dirty, c.dirty || {});
     (c.unsynced || []).forEach((id) => unsynced.add(id));
@@ -2509,6 +2918,9 @@ function boot() {
     (c.ideaErased || []).forEach((id) => ideaErased.add(id));
     ui.ideaDraft = c.ideaDraft || '';
     lastBackup = c.lastBackup || 0;
+    restLen = c.restLen || REST_DEFAULT;
+    restEnd = c.restEnd > Date.now() ? c.restEnd : 0;
+    markBuiltIdeas();
   } else {
     S.config = defaultConfig();
   }
@@ -2517,6 +2929,7 @@ function boot() {
   render();
   saveCache();
   bindEvents();
+  runRest();
   if (LOCAL) {
     goLocal();
     // Opens with no signal: sw.js keeps the last copy of the app.
