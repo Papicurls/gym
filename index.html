@@ -410,6 +410,15 @@ body.has-rest { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 .del-panel { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 8px; border: 1px solid var(--error-border); background: var(--error-bg); }
 .del-panel p { margin: 0; font-size: 14px; line-height: 1.45; }
 .del-panel .txt { align-self: flex-start; }
+.lift-panel { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.18); border: 1px solid var(--border); }
+.lift-out { display: flex; flex-direction: column; gap: 2px; padding-top: 12px; border-top: 1px solid var(--border); }
+.lift-out .sub-label { margin-bottom: 4px; }
+.lift-out .txt { align-self: flex-start; }
+.lift-out .note { margin: -4px 0 8px 4px; }
+.lift-out .note:last-child { margin-bottom: 0; }
+.lift-out .del-panel { margin-top: 4px; }
+.lift-close { align-self: flex-end; margin: -6px -4px -6px 0; }
+.lift-note { align-self: flex-start; margin: -6px 0 0 -4px; padding-bottom: 10px; border-bottom: 1px solid var(--border); width: calc(100% + 8px); }
 .btn-ghost.danger { color: var(--error-fg); border-color: var(--error-border); }
 .btn-ghost.danger:hover { background: rgba(248, 113, 113, 0.08); }
 
@@ -517,7 +526,7 @@ const REP_RANGES = { 'cable crunch': [8, 12] };
 const rangeOf = (name) => REP_RANGES[normalize(name)] || REP_RANGE;
 
 // Ideas Claude has built. The home-screen app has no database for Claude to mark them in, so it marks them itself.
-const BUILT_IDEAS = ['idea-1793303844623', 'idea-1793832557272'];
+const BUILT_IDEAS = ['idea-1793303844623', 'idea-1793832557272', 'idea-1794095357672', 'idea-1794340570038'];
 
 const CATALOG = {
   'adductors': { name: 'Adductors', day: 'lower', track: 'lb' },
@@ -664,6 +673,7 @@ const ui = {
   delAsk: null,
   skipped: null, // { day, i, ex }: the lift he just took off today's workout, for Undo
   lowerOpen: false, // the Quads / Hams choice under the Lower button
+  liftEdit: null, // the lift whose settings (format, left/right, take off, delete) are open on its card
   noteEdit: null, noteDraft: '', // the lift whose note is open for typing
   ideaDraft: '', ideaSaved: false, ideaCopied: null,
   backupMsg: null, restore: null,
@@ -723,10 +733,21 @@ function partOf(name) {
   if (c && c.day) return c.day;
   return LOWER_NAMES.has(normalize(name)) ? 'lower' : 'upper';
 }
+// The lift's own setting wins, so a lift he switched to another format stays switched.
 function trackOf(name) {
-  if (normalize(name) === 'preacher curl') return 'preacher';
   const c = catOf(name);
-  return c && c.track ? c.track : null;
+  if (c && c.track) return c.track;
+  return normalize(name) === 'preacher curl' ? 'preacher' : null;
+}
+// The formats he can pick for a lift. The preacher curl's two stacks are top and middle.
+const formatsFor = (name) => (normalize(name) === 'preacher curl'
+  ? [['lb', 'Weight'], ['plates', 'Plates + weight'], ['preacher', 'Top + middle']] : FORMATS);
+// Left/right: the lift's setting if he picked one, else whether last time had sides.
+function uniOf(name) {
+  const c = catOf(name);
+  if (c && typeof c.uni === 'boolean') return c.uni;
+  const last = lastFinishedSets(name);
+  return !!(last && last.some((s) => s.side));
 }
 
 /* ---------- Sets ---------- */
@@ -780,6 +801,43 @@ function setPlatesTotal(s, t) {
   t = Math.max(0, r2(t));
   s.plates = Math.floor((t + 1e-9) / PLATE);
   s.extra = r2(t - s.plates * PLATE);
+}
+// A set moved to another format keeps its total weight, reps, side and RIR: 320 lb becomes
+// 7 plates and 5, and two stacks go on top with 0 below. Past workouts are never converted.
+function convertSet(s, track) {
+  if (!s || s.kind === track || (track === 'lb' && !s.kind)) return s;
+  const o = blankSet(track, s.side);
+  if (isTwo(s) && isTwo(o)) { o.top = s.top; o.mid = s.mid; }
+  else if (hasLoad(s)) {
+    const t = total(s);
+    if (track === 'plates') setPlatesTotal(o, t);
+    else if (isTwo(o)) { o.top = t; o.mid = 0; }
+    else o.lb = t;
+  }
+  o.reps = s.reps;
+  if (s.q) o.q = s.q;
+  if (s.rir) o.rir = true;
+  o.edited = !!s.edited;
+  return o;
+}
+// Left/right on: each set becomes a right and a left set. Off: the side that went first stays.
+function toSides(sets) {
+  if (sets.some((s) => s.side)) return sets;
+  return sets.flatMap((s) => [Object.assign(clone(s), { side: 'right' }), Object.assign(clone(s), { side: 'left' })]);
+}
+function noSides(sets) {
+  const first = (sets.find((s) => s.side) || {}).side;
+  if (!first) return sets;
+  return sets.filter((s) => !s.side || s.side === first).map((s) => { const o = clone(s); delete o.side; return o; });
+}
+// Sets as the lift is tracked now: its format, and left/right if he set it.
+function inLiftFormat(name, sets) {
+  const track = trackOf(name);
+  let out = track ? sets.map((s) => convertSet(s, track)) : sets;
+  const c = catOf(name);
+  if (c && c.uni === true) out = toSides(out);
+  else if (c && c.uni === false) out = noSides(out);
+  return out;
 }
 
 /* ---------- Text ---------- */
@@ -859,24 +917,39 @@ function liftPoints(name) {
   return pts;
 }
 const sessionsWith = (name) => sessionsOldestFirst().filter((s) => s.exercises.some((e) => sameName(e.name, name)));
-// Last time on this day if he's done the lift on it, else last time on any day. Both leg days share
-// lifts with different set counts, so Quads shows the last Quads and Hams the last Hams (an old
-// Lower workout counts as the one it started like, as on the Lower choice).
+const isLegSession = (s) => s.day === 'lower' || LEG_DAYS.includes(s.day);
+// Last time he did the lift: on Upper, the last Upper (else any day).
+// On a leg day the weights come from the newest leg workout, Quads or Hams, so more weight on one
+// shows up on the other (Chris, 2026-11-10). The number of sets is still this day's: what he did
+// here last time, or LEG_SETS until he's done it here. Lifts not in LEG_SETS (abs) keep whatever he did last.
 function lastFinishedSets(name, day) {
-  let any = null;
+  const leg = LEG_DAYS.includes(day);
+  let any = null, newest = null, own = null;
   for (const s of sessionsNewestFirst()) {
     const e = s.exercises.find((x) => sameName(x.name, name));
     if (!e || !e.sets || !e.sets.length) continue;
-    if (!day || s.day === day || legDayOf(s) === day) return e.sets;
+    if (!day) return e.sets;
     if (!any) any = e.sets;
+    if (!leg) { if (s.day === day) return e.sets; continue; }
+    if (!newest && isLegSession(s)) newest = e.sets;
+    if (s.day === day) { own = e.sets; break; }
   }
-  return any;
+  if (!leg) return any;
+  const last = newest || any;
+  const n = LEG_SETS[day][normalize(name)];
+  if (!last || !n || last.some((s) => s.side)) return last;
+  return fitSets(last, own ? own.length : n, own);
 }
-const doneOnDay = (name, day) => sessionsOldestFirst().some((s) => s.day === day && s.exercises.some((e) => sameName(e.name, name)));
-// First n sets; short of n, the last set repeats.
-function fitSets(sets, n) {
+// First n sets; short of n, the last set repeats. With `like` (this day's last time), a repeated set
+// takes its RIR mark from the same set there.
+function fitSets(sets, n, like) {
   const out = sets.slice(0, n);
-  while (out.length < n) out.push(clone(out[out.length - 1]));
+  while (out.length < n) {
+    const s = clone(sets[sets.length - 1]);
+    const l = like && like[out.length];
+    if (l) { if (l.rir) s.rir = true; else delete s.rir; }
+    out.push(s);
+  }
   return out;
 }
 
@@ -967,14 +1040,14 @@ function markBuiltIdeas() {
   }
 }
 
-// Sets start as exactly what he did last time: same order, sides, weights, reps and RIR.
+// Sets start as exactly what he did last time: same order, sides, weights, reps and RIR, in the
+// format the lift is tracked in now.
 function makeExercise(name, day) {
-  let last = lastFinishedSets(name, day);
-  const n = LEG_SETS[day] && LEG_SETS[day][normalize(name)];
-  if (last && n && !doneOnDay(name, day)) last = fitSets(last, n);
-  if (last) return { name, sets: last.map((s) => Object.assign(clone(s), { edited: false })), logged: false, touched: false, from: 'history' };
+  const fresh = (sets) => inLiftFormat(name, sets).map((s) => Object.assign(clone(s), { edited: false }));
+  const last = lastFinishedSets(name, day);
+  if (last) return { name, sets: fresh(last), logged: false, touched: false, from: 'history' };
   const st = S.config.starter[normalize(name)];
-  if (st && st.length) return { name, sets: st.map((s) => Object.assign(clone(s), { edited: false })), logged: false, touched: false, from: 'starter' };
+  if (st && st.length) return { name, sets: fresh(st), logged: false, touched: false, from: 'starter' };
   const track = trackOf(name);
   const c = catOf(name);
   if (track) return { name, sets: blankSets(track, !!(c && c.uni)), logged: false, touched: false, from: null };
@@ -984,6 +1057,24 @@ function makeExercise(name, day) {
 function buildWorkout(day) {
   const now = Date.now();
   return { startedAt: now, date: todayStr(), updatedAt: now, exercises: planNames(day).map((n) => makeExercise(n, day)) };
+}
+// A lift he hasn't touched in an open workout still shows last time. When last time changes under
+// it (another workout finished, a restore, an app update), it catches up. Anything he changed stays.
+function refreshUntouched() {
+  let changed = false;
+  for (const day of DAYS) {
+    const w = S.live[day];
+    if (!w || !Array.isArray(w.exercises)) continue;
+    for (const e of w.exercises) {
+      if (e.touched || e.logged || e.from !== 'history' || !e.sets || e.sets.some((s) => s.edited)) continue;
+      const f = makeExercise(e.name, day);
+      if (f.from !== 'history' || JSON.stringify(f.sets) === JSON.stringify(e.sets)) continue;
+      e.sets = f.sets; // w.updatedAt stays: a workout nobody touched still ends after STALE_MS
+      changed = true;
+    }
+  }
+  if (changed) { S.live.updatedAt = Date.now(); dirty.live = true; }
+  return changed;
 }
 
 function touchLive(day) {
@@ -1019,6 +1110,7 @@ function finishWorkout(day, auto) {
   S.config.base[day] = mergeOrder(list, kept);
   touchConfig();
   S.live[day] = null;
+  refreshUntouched();
   S.live.updatedAt = Date.now();
   dirty.live = true;
   saveCache();
@@ -1403,6 +1495,7 @@ function setRoute(r) {
   ui.from = r.from || null;
   ui.delAsk = null;
   ui.skipped = null;
+  ui.liftEdit = null;
   ui.noteEdit = null;
   ui.noteDraft = '';
   ui.ideaSaved = false;
@@ -1534,7 +1627,8 @@ const ICON_CHART = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 const ICON_TRASH = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 const ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const ICON_NOTE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14 7l3 3"/></svg>';
-const ICON_TIMER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
+const ICON_MORE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+const ICON_TIMER ='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
 const ICON_UP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>';
 const livePill = () => '<span class="live"><i></i>Live</span>';
 const saveWarnHtml = () => '<div class="save-warn" id="saveWarn" role="alert" hidden><span></span><button class="txt" data-act="retry-save">Retry now</button></div>';
@@ -1764,6 +1858,7 @@ function applyRestore() {
   S.live = normLive(d.live);
   S.ideas = d.ideas && typeof d.ideas === 'object' ? d.ideas : {};
   markBuiltIdeas();
+  refreshUntouched();
   lastBackup = d.exportedAt || Date.now();
   autoFinishStale();
   ui.restore = null;
@@ -1891,12 +1986,43 @@ function renderExCard(e, i) {
   const foot = `<div class="ex-foot">${e.sets.length ? `<button class="txt" data-act="add-set" data-i="${i}">+ Add set</button>` : ''}<span class="foot-r">` +
     (e.sets.length > 1 ? `<button class="txt muted" data-act="remove-set" data-i="${i}">Remove set</button>` : '') +
     `<button class="txt${rmOn ? ' danger' : ''}" data-act="remove-ex" data-i="${i}">${rmOn ? 'Tap again to skip' : "Didn't do it"}</button></span></div>`;
-  const noNote = !noteOf(e.name) && !isNoteEdit(e.name);
+  // With sets, "Add a note" lives in the ⋯ panel so a long name keeps room in the head.
+  const noNote = !noteOf(e.name) && !isNoteEdit(e.name) && !e.sets.length;
+  const editOn = e.sets.length > 0 && isLiftEdit(e.name);
   return `<article class="card ex${e.logged ? ' is-logged' : ''}" data-ex="${i}"><div class="ex-head"><span class="grip" aria-hidden="true">${ICON_GRIP}</span><div class="ex-name">${esc(e.name)}</div><div class="ex-tools">` +
     (noNote ? `<button class="icon-btn" data-act="note-edit" data-name="${esc(e.name)}" aria-label="Add a note to ${esc(e.name)}">${ICON_NOTE}</button>` : '') +
     (pts.length ? `<button class="icon-btn${open ? ' on' : ''}" data-act="chart-toggle" data-i="${i}" aria-pressed="${open}" aria-label="${open ? 'Hide' : 'Show'} ${esc(e.name)} chart">${ICON_CHART}</button>` : '') +
+    (e.sets.length ? `<button class="icon-btn${editOn ? ' on' : ''}" data-act="lift-edit" data-name="${esc(e.name)}" aria-expanded="${editOn}" aria-label="${esc(e.name)}: change how it's tracked, take it off or delete it">${ICON_MORE}</button>` : '') +
     `<button class="badge-btn" data-act="toggle-logged" data-i="${i}" aria-pressed="${!!e.logged}" aria-label="${esc(e.name)} done">${badgeHtml(e)}</button></div></div>` +
-    noteHtml(e.name) + chart + body + foot + '</article>';
+    (editOn ? liftPanelHtml(e, i) : '') + noteHtml(e.name) + chart + body + foot + '</article>';
+}
+
+// How a lift is tracked: its format and left/right. He changes it here instead of making a new
+// exercise (Chris, 2026-11-07). Shown on a card's ⋯ panel and on the lift's own page.
+const isLiftEdit = (name) => ui.liftEdit != null && sameName(ui.liftEdit, name);
+const curTrack = (name) => trackOf(name) || ((lastFinishedSets(name) || [])[0] || {}).kind || 'lb';
+function trackPickHtml(name) {
+  const cur = curTrack(name), uni = uniOf(name), nm = esc(name);
+  return `<p class="sub-label">How you track it</p>` +
+    `<div class="pills" role="radiogroup" aria-label="How you track ${nm}">${formatsFor(name).map(([f, label]) =>
+      `<button class="pill${cur === f ? ' on' : ''}" data-act="lift-track" data-name="${nm}" data-track="${f}" role="radio" aria-checked="${cur === f}">${label}</button>`).join('')}</div>` +
+    `<div class="pills"><button class="pill${uni ? ' on' : ''}" data-act="lift-uni" data-name="${nm}" aria-pressed="${uni}">Left / right</button></div>` +
+    `<p class="note">Switches today's sets and every workout after. Past workouts stay as you logged them.</p>`;
+}
+// The ⋯ panel on a card: how it's tracked, then the two ways to get rid of it for good.
+// ("Didn't do it" at the bottom of the card is for today only.)
+function liftPanelHtml(e, i) {
+  const nm = esc(e.name), dayName = DAY_NAME[ui.day];
+  const dropOn = isConfirm('drop-' + i);
+  const del = ui.delAsk && sameName(ui.delAsk, e.name) ? delPanel(e.name)
+    : `<button class="txt danger" data-act="del-ask" data-name="${nm}">Delete ${nm}</button><p class="note">Gone from every day and your exercise list.</p>`;
+  const addNote = !noteOf(e.name) && !isNoteEdit(e.name)
+    ? `<button class="txt lift-note" data-act="note-edit" data-name="${nm}">${ICON_NOTE}&nbsp;Add a note</button>` : '';
+  return `<div class="lift-panel" role="group" aria-label="${nm} settings">${addNote}${trackPickHtml(e.name)}` +
+    `<div class="lift-out"><p class="sub-label">Get rid of it</p>` +
+    `<button class="txt${dropOn ? ' danger' : ''}" data-act="drop-day" data-i="${i}">${dropOn ? 'Tap again to take it off' : `Take off ${dayName}`}</button>` +
+    `<p class="note">Gone from ${dayName} from now on. Add it back any time with + Add exercise.</p>${del}</div>` +
+    `<button class="txt muted lift-close" data-act="lift-close">Close</button></div>`;
 }
 
 // Top of the rep range means it's time to add weight: today if he hit it last time, next time if he
@@ -1983,7 +2109,8 @@ function cardsWithSkipNote(day, w) {
   const cards = w.exercises.map(renderExCard);
   const k = ui.skipped;
   if (k && k.day === day) {
-    cards.splice(Math.min(k.i, cards.length), 0, `<div class="skip-note" role="status"><span><b>${esc(k.ex.name)}</b> is off today. It's back next ${DAY_NAME[day]}.</span><button class="txt" data-act="undo-skip">Undo</button></div>`);
+    const msg = k.base ? `is off ${DAY_NAME[day]} for good.` : `is off today. It's back next ${DAY_NAME[day]}.`;
+    cards.splice(Math.min(k.i, cards.length), 0, `<div class="skip-note" role="status"><span><b>${esc(k.ex.name)}</b> ${msg}</span><button class="txt" data-act="undo-skip">Undo</button></div>`);
   }
   return cards.join('');
 }
@@ -1995,7 +2122,8 @@ function renderExercise() {
   const head = `<div class="topbar"><button class="back" data-act="back">${ICON_BACK}${backLabel}</button><span class="day-badge">${PART_NAME[partOf(name)]}</span></div><h1 class="h-day">${esc(name)}</h1>` +
     (noteOf(name) || isNoteEdit(name) ? noteHtml(name) : `<div><button class="txt" data-act="note-edit" data-name="${esc(name)}">${ICON_NOTE}&nbsp;Add a note</button></div>`);
   const note = '<p class="note">Each point is the heaviest weight you used that day, in pounds (a plate counts as 45). Reps only break a tie. Tap a point or a workout below.</p>';
-  const del = `<section class="stack-sm">${ui.delAsk && sameName(ui.delAsk, name) ? delPanel(name) : `<div><button class="txt danger" data-act="del-ask" data-name="${esc(name)}">Delete ${esc(name)}</button></div>`}</section>`;
+  const del = `<section class="card stack-sm">${trackPickHtml(name)}</section>` +
+    `<section class="stack-sm">${ui.delAsk && sameName(ui.delAsk, name) ? delPanel(name) : `<div><button class="txt danger" data-act="del-ask" data-name="${esc(name)}">Delete ${esc(name)}</button></div>`}</section>`;
   if (!pts.length) return `${head}<section class="card"><p class="empty">No sets logged for ${esc(name)} yet.</p></section>${note}${del}`;
   const n = pts.length, latest = pts[n - 1], first = pts[0];
   let bi = 0;
@@ -2255,7 +2383,8 @@ function addSet(i) {
     n = Object.assign(clone(src || last), { edited: false });
     if (side) n.side = side;
     // If last time had a set in this spot, show exactly that.
-    const prev = lastFinishedSets(e.name, day);
+    const was = lastFinishedSets(e.name, day);
+    const prev = was && inLiftFormat(e.name, was);
     if (prev) {
       const k = sideKey(n);
       const same = prev.filter((s) => sideKey(s) === k);
@@ -2296,11 +2425,50 @@ function removeExercise(i) {
 function undoSkip() {
   const k = ui.skipped;
   ui.skipped = null;
+  if (k && k.base) { S.config.base[k.day] = k.base; touchConfig(); saveCache(); scheduleFlush(); }
   const w = k && S.live[k.day];
   if (w && !w.exercises.some((e) => sameName(e.name, k.ex.name))) {
     w.exercises.splice(Math.min(k.i, w.exercises.length), 0, k.ex);
     touchLive(k.day);
   }
+  render();
+}
+// "Take off <day>": off today's workout and off the day's list, so it's not there next time. It
+// stays in the exercise list (+ Add exercise), on the other days, and in past workouts.
+function dropFromDay(i) {
+  const { day, w, e } = ctx(i);
+  if (!w || !e) return;
+  const key = 'drop-' + i;
+  if (!isConfirm(key)) { armConfirm(key); return; }
+  clearConfirm();
+  const base = (S.config.base[day] || []).slice();
+  S.config.base[day] = base.filter((n) => !sameName(n, e.name));
+  touchConfig();
+  const [gone] = w.exercises.splice(i, 1);
+  if (gone && w.cur === normalize(gone.name)) w.cur = i > 0 ? normalize(w.exercises[i - 1].name) : null;
+  ui.liftEdit = null;
+  ui.delAsk = null;
+  ui.skipped = { day, i, ex: gone, base };
+  touchLive(day);
+  render();
+}
+// A new format or left/right for a lift. Its name, history and charts stay. Sets in open workouts
+// switch now; later workouts switch when makeExercise reads last time.
+function setLiftFormat(name, change) {
+  const k = normalize(name);
+  const c = S.config.exercises[k] || (S.config.exercises[k] = { name, day: partOf(name) });
+  Object.assign(c, change);
+  touchConfig();
+  let liveChanged = false;
+  for (const d of DAYS) {
+    const w = S.live[d];
+    const e = w && w.exercises.find((x) => normalize(x.name) === k);
+    if (!e || !e.sets.length) continue;
+    e.sets = inLiftFormat(e.name, e.sets);
+    liveChanged = true;
+  }
+  if (liveChanged) touchLive(null);
+  else { saveCache(); scheduleFlush(); }
   render();
 }
 function pickTrack(i, track) {
@@ -2421,6 +2589,7 @@ function deleteExercise(name, erase) {
 }
 function confirmDelete(name, erase) {
   ui.delAsk = null;
+  ui.liftEdit = null;
   deleteExercise(name, erase);
   if (ui.screen === 'exercise') back(); else render();
 }
@@ -2659,7 +2828,7 @@ function onClick(ev) {
 
   // Every other action closes the editor first.
   const hadEditor = closeEditor();
-  if (a !== 'complete' && a !== 'remove-ex' && a !== 'idea-del' && a !== 'cancel-workout') clearConfirm();
+  if (a !== 'complete' && a !== 'remove-ex' && a !== 'idea-del' && a !== 'cancel-workout' && a !== 'drop-day') clearConfirm();
   if (a === 'undo-skip') { undoSkip(); return; }
   const hadSkip = !!ui.skipped;
   ui.skipped = null;
@@ -2667,7 +2836,7 @@ function onClick(ev) {
   switch (a) {
     case 'open-day': openDay(t.dataset.day); break;
     case 'lower-pick': ui.lowerOpen = !ui.lowerOpen; ui.toast = null; render(); break;
-    case 'note-edit': openNote(t.dataset.name); break;
+    case 'note-edit': ui.liftEdit = null; ui.delAsk = null; openNote(t.dataset.name); break;
     case 'note-save': saveNote(t.dataset.name); break;
     case 'note-cancel': ui.noteEdit = null; ui.noteDraft = ''; render(); break;
     case 'back': back(); break;
@@ -2726,6 +2895,17 @@ function onClick(ev) {
     case 'remove-set': removeSet(i); break;
     case 'remove-ex': if (ui.confirm && ui.confirm.key !== 'rm-' + i) clearConfirm(); removeExercise(i); break;
     case 'pick-track': pickTrack(i, t.dataset.track); break;
+    case 'lift-edit': {
+      const n = t.dataset.name;
+      ui.liftEdit = isLiftEdit(n) ? null : n;
+      ui.delAsk = null;
+      render();
+      break;
+    }
+    case 'lift-close': ui.liftEdit = null; ui.delAsk = null; render(); break;
+    case 'lift-track': setLiftFormat(t.dataset.name, { track: t.dataset.track }); break;
+    case 'lift-uni': setLiftFormat(t.dataset.name, { uni: !uniOf(t.dataset.name) }); break;
+    case 'drop-day': if (ui.confirm && ui.confirm.key !== 'drop-' + i) clearConfirm(); dropFromDay(i); break;
     case 'add-exercise': go({ screen: 'add', day: ui.day }); break;
     case 'complete': if (ui.confirm && ui.confirm.key !== 'complete') clearConfirm(); completeWorkout(); break;
     case 'cancel-workout': if (ui.confirm && ui.confirm.key !== 'cancel') clearConfirm(); cancelWorkout(); break;
@@ -2921,6 +3101,7 @@ function boot() {
     restLen = c.restLen || REST_DEFAULT;
     restEnd = c.restEnd > Date.now() ? c.restEnd : 0;
     markBuiltIdeas();
+    refreshUntouched();
   } else {
     S.config = defaultConfig();
   }
